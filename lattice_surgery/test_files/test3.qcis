@@ -1,0 +1,16 @@
+X Q1
+H Q3
+H Q4
+H Q2
+H Q1
+CZ Q3 Q4
+H Q3
+H Q4
+CZ Q2 Q3
+H Q3
+CZ Q2 Q1
+H Q1
+M Q1
+M Q2
+M Q3
+M Q4
