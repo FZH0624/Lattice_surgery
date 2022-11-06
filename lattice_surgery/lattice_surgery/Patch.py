@@ -76,11 +76,11 @@ class Patch:
 
     '''
 
-    def __init__(self, name, axis):
+    def __init__(self, name, axis, info='0'):
 
         self.axis = axis
         self.name = name
-        self.info = None
+        self.info = info
         self.border = []
         self.border_map = {}
         self.init()
@@ -101,18 +101,31 @@ class Patch:
         else:
             self.border.pop(flag)
 
-    def get_border(self):
+    def get_border(self, sort=True):
 
         self.border = []
 
         for axis in self.axis:
+
             sqr = Square(axis)
 
-            self.add_edge(sqr.left)
+            self.add_edge(sqr.down)
             self.add_edge(sqr.right)
             self.add_edge(sqr.up)
-            self.add_edge(sqr.down)
+            self.add_edge(sqr.left)
 
+        # sort the border list
+        if sort:
+            for i in range(len(self.border)):
+                end = self.border[i][1]
+                for j in range(len(self.border)):
+                    edge = self.border[j]
+                    if edge[0] == end:
+                        x = self.border.pop(j)
+                        break
+                self.border.insert(i + 1, x)
+
+        # update border map
         del_list = []
 
         for edge in self.border_map.keys():
@@ -122,10 +135,11 @@ class Patch:
         for edge in del_list:
             del self.border_map[edge]
 
-    def init(self, info='0'):
+    def init(self):
 
         # default: every patch initialized by one axis
-        self.info = info
+        # 1 for 'X' type boundary
+        # 0 for 'Z' type boundary
         self.get_border()
         sqr = Square(self.axis[-1])
         self.border_map[sqr.up] = 1

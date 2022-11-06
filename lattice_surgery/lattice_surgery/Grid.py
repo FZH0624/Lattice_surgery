@@ -36,8 +36,9 @@ class Grid:
             pat = Patch(qbit, axis)
             self.config[qbit] = pat
 
-    def simulation(self, ins):
+    def simulation(self, ins: list) -> list:
 
+        result = []
         gate_typ = ins[0]
         op1 = ins[1]
         if len(ins) > 2:
@@ -98,7 +99,27 @@ class Grid:
         self.move_by_path(op2, path)
         result.append(copy.deepcopy(self.config))
 
+        # step3
+        self.add_new_patch(name='A_CNOT', axis=[(patch1.axis[-1][0], patch1.axis[-1][1] + 1)], info='+')
+        result.append(copy.deepcopy(self.config))
+        self.merge(op1, 'A_CNOT')
+        result.append(copy.deepcopy(self.config))
+        print(self.config[op1].border_map)
+        print(self.config['A_CNOT'].border_map)
+
         return result
+
+    def add_new_patch(self, name, axis, info='0'):
+
+        self.config[name] = Patch(name=name, axis=axis, info=info)
+
+    def merge(self, op1, op2):
+
+        for edge1 in self.config[op1].border:
+            for edge2 in self.config[op2].border:
+                if equal(edge1, edge2):
+                    self.config[op1].border_map[edge1] = 'M'
+                    self.config[op2].border_map[edge2] = 'M'
 
     def rotation(self, name: str) -> list:
 
@@ -269,11 +290,17 @@ class Grid:
 
             for edge in patch.border:
 
-                if patch.border_map[edge]:
-                    mark = '-'
-                else:
+                if not patch.border_map[edge]:
                     mark = '--'
-                plt.plot([edge[0][0], edge[1][0]], [edge[0][1], edge[1][1]], mark, color='black')
+                    color = 'black'
+                else:
+                    if patch.border_map[edge] == 1:
+                        mark = '-'
+                        color = 'black'
+                    else:
+                        mark = '-'
+                        color = 'blue'
+                plt.plot([edge[0][0], edge[1][0]], [edge[0][1], edge[1][1]], mark, color=color)
 
         ax.set_aspect('equal', adjustable='box')
         plt.grid('True')

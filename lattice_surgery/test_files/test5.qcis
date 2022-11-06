@@ -1,3 +1,4 @@
 H Q1
 H Q3
-CNOT Q1 Q2
+H Q2
+S Q1
