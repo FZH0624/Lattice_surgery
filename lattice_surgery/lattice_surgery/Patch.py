@@ -76,14 +76,14 @@ class Patch:
 
     '''
 
-    def __init__(self, name, axis, info='0'):
+    def __init__(self, name, axis, info='0', reverse=False):
 
         self.axis = axis
         self.name = name
         self.info = info
         self.border = []
         self.border_map = {}
-        self.init()
+        self.init(reverse)
 
     def add_edge(self, e):
 
@@ -96,7 +96,7 @@ class Patch:
             if p1 in self.border[i] and p2 in self.border[i]:
                 flag = i
 
-        if not flag:
+        if not isinstance(flag, int):
             self.border.append((p1, p2))
         else:
             self.border.pop(flag)
@@ -114,6 +114,16 @@ class Patch:
             self.add_edge(sqr.up)
             self.add_edge(sqr.left)
 
+        # update border map
+        del_list = []
+
+        for edge in self.border_map.keys():
+            if edge not in self.border:
+                del_list.append(edge)
+
+        for edge in del_list:
+            del self.border_map[edge]
+
         # sort the border list
         if sort:
             for i in range(len(self.border)):
@@ -125,48 +135,48 @@ class Patch:
                         break
                 self.border.insert(i + 1, x)
 
-        # update border map
-        del_list = []
 
-        for edge in self.border_map.keys():
-            if edge not in self.border:
-                del_list.append(edge)
 
-        for edge in del_list:
-            del self.border_map[edge]
-
-    def init(self):
+    def init(self, reverse=False):
 
         # default: every patch initialized by one axis
         # 1 for 'X' type boundary
         # 0 for 'Z' type boundary
+        if reverse:
+            t = 1
+        else:
+            t = 0
         self.get_border()
         sqr = Square(self.axis[-1])
-        self.border_map[sqr.up] = 1
-        self.border_map[sqr.left] = 0
-        self.border_map[sqr.down] = 1
-        self.border_map[sqr.right] = 0
+        self.border_map[sqr.up] = 1 - t
+        self.border_map[sqr.left] = t
+        self.border_map[sqr.down] = 1 - t
+        self.border_map[sqr.right] = t
 
     def switch_border(self):
 
         for edge in self.border_map.keys():
             self.border_map[edge] = 1 - self.border_map[edge]
 
-    def is_right_rotation(self):
+    def is_right_rotation(self, reverse=False):
 
+        if reverse:
+            t = 0
+        else:
+            t = 1
         sqr = Square(self.axis[-1])
         u, d, l, r = False, False, False, False
 
         if len(self.axis) == 1:
             for edge in self.border:
                 if equal(edge, sqr.up):
-                    u = self.border_map[edge] == 1
+                    u = self.border_map[edge] == t
                 elif equal(edge, sqr.down):
-                    d = self.border_map[edge] == 1
+                    d = self.border_map[edge] == t
                 elif equal(edge, sqr.left):
-                    l = self.border_map[edge] == 0
+                    l = self.border_map[edge] == 1-t
                 elif equal(edge, sqr.right):
-                    r = self.border_map[edge] == 0
+                    r = self.border_map[edge] == 1-t
                 else:
                     return NotImplemented
 

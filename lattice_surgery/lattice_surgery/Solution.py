@@ -44,3 +44,4 @@ class Solution:
         ##chip.data_block.move_corner('Q1', ((0, 1), (0, 0)), ((2, 1), (1, 1)))
         #visual(chip.configuration)
         #chip.visual_all()
+
